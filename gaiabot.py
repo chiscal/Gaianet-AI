@@ -15,7 +15,6 @@ logging.basicConfig(
 )
 
 # Configuration
-BASE_URL = "https://pengu.gaia.domains"
 MODEL = "qwen2-0.5b-instruct"
 MAX_RETRIES = 100  # Essentially infinite retries
 RETRY_DELAY = 5  # Seconds between retries
@@ -124,7 +123,7 @@ QUESTIONS = [
     "How to manage tasks in no-code apps?"
 ]
 
-def chat_with_ai(api_key: str, question: str) -> str:
+def chat_with_ai(api_key: str, question: str, base_url: str) -> str:
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -144,7 +143,7 @@ def chat_with_ai(api_key: str, question: str) -> str:
         try:
             logging.info(f"Attempt {attempt+1} for question: {question[:50]}...")
             response = requests.post(
-                f"{BASE_URL}/v1/chat/completions",
+                f"{base_url}/v1/chat/completions",
                 headers=headers,
                 json=data,
                 timeout=30
@@ -162,7 +161,7 @@ def chat_with_ai(api_key: str, question: str) -> str:
 
     raise Exception("Max retries exceeded")
 
-def run_bot(api_key: str):
+def run_bot(api_key: str, base_url: str):
     while True:  # Outer loop to repeat the questions indefinitely
         random.shuffle(QUESTIONS)
         logging.info(f"Starting chatbot with {len(QUESTIONS)} questions in random order")
@@ -173,7 +172,7 @@ def run_bot(api_key: str):
 
             start_time = time.time()
             try:
-                response = chat_with_ai(api_key, question)
+                response = chat_with_ai(api_key, question, base_url)
                 elapsed = time.time() - start_time
 
                 # Print the entire response
@@ -193,7 +192,8 @@ def main():
     print("Title: GaiaAI Chatbot")
     print("Twitter: https://x.com/0xMoei")
     api_key = input("Enter your API key: ")
-    run_bot(api_key)
+    base_url = input("Enter domain URL: ")
+    run_bot(api_key, base_url)
 
 if __name__ == "__main__":
     main()
